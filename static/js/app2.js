@@ -1,19 +1,13 @@
-let data; //delete me later
+let data;
 
-// on load (homepage is visited)
 d3.json('../samples.json').then(function(json) {
-    console.log('loading');
+    // console.log('loading');
     // load your data
-    console.log(json);
-    data = json; //delete me later too
+    // console.log(json);
+    data = json; 
     // populate dropdown
     var testids = d3.select('#selDataset');
-    // the non suck way
-        // var optionHTML = "";
-        // for (number in data.names) {
-        //     optionHTML = optionHTML + `<option>${data.names[number]}</option>`;
-        // }
-        // testids.html(optionHTML);
+
     data.names.forEach(row => {
         testids
             .append('option')
@@ -25,24 +19,74 @@ d3.json('../samples.json').then(function(json) {
 });
 
 function drawchart(sample) {
-    console.log(sample);
+    // console.log(sample);
     var trace1 = {
+        x: sample.sample_values.slice(0,9).reverse(),
+        y: sample.otu_ids.map(id => `OTU ${id}`).slice(0,9).reverse(),
+        hovertext: sample.otu_labels.slice(0,9).reverse(),
         type: 'bar',
-        x: sample.sample_values,
-        y: sample.otu_ids,
+        orientation: 'h'
     };
 
-    var plotData = [trace1];
+    var barData = [trace1];
 
-    Plotly.newPlot('bar', plotData);
+    Plotly.newPlot('bar', barData);
 }
 
-function drawscatter() {
-    console.log('scatter');
+function drawBubble(sample) {
+    var trace2 = {
+        x: sample.otu_ids,
+        y: sample.sample_values,
+        text: sample.otu_labels,
+        mode: 'markers',
+        marker: {
+            size: sample.sample_values,
+            color: sample.otu_ids
+        }
+    };
+
+    var bubbleData = [trace2]
+
+    Plotly.newPlot('bubble',bubbleData)
+}
+
+function demoTable(metadata) {
+
+    var demoInfo = d3.select('#sample-metadata')
+
+
+        demoInfo
+            .text(`Id: ${metadata.id}`)
+            .append('div')
+
+            .text(`ethnicity: ${metadata.ethnicity}`)
+            .append('div')
+
+            .text(`gender: ${metadata.gender}`)
+            .append('div')
+
+            .text(`age: ${metadata.age}`)
+            .append('div')
+
+            .text(`location: ${metadata.location}`)
+            .append('div')
+
+            .text(`bbtype: ${metadata.bbtype}`)
+            .append('div')
+
+            .text(`wfreq: ${metadata.wfreq}`)     
 }
 
 function optionChanged(testid) {
+    console.log(testid)
+
     var sample = data.samples.filter(thingy => thingy.id == testid)[0];
+    var metadata = data.metadata.filter(thingy => thingy.id == testid)[0];
+
+    console.log(sample)
+    console.log(metadata)
+
     drawchart(sample);
-    drawscatter();
+    demoTable(metadata);
+    drawBubble(sample);
 }
